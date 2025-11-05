@@ -98,7 +98,7 @@
 
         if (!isLoggedIn || userRole !== 'Student') {
             alert('Access Denied. Please log in as a student.');
-            window.location.href = 'Login.html'; 
+            window.location.href = 'index.html'; 
         }
 
         const loggedInUserRaw = localStorage.getItem(LOGGED_IN_USER_KEY);
@@ -350,4 +350,5 @@
         });
     </script>
 </body>
+
 </html>
