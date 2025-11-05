@@ -1,6 +1,4 @@
-# EduTask---Task-Management
-
-Description
+# Description
 
 “EduTask”. It stands for Education Task. “EduTask” is an app built to connect students and teachers, making schoolwork organized and simple.
 
