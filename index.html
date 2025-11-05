@@ -97,53 +97,55 @@
           }
         }
 
-        function handleLogin() {
-            const email = document.getElementById('email-input').value.trim();
-            const password = document.getElementById('password-input').value;
-            const selectedRole = document.getElementById('login-role').value;
-            const messageDiv = document.getElementById('message');
+       function handleLogin() {
+    const email = document.getElementById('email-input').value.trim();
+    const password = document.getElementById('password-input').value;
+    const selectedRole = document.getElementById('login-role').value;
+    const messageDiv = document.getElementById('message');
 
-            const storedUsersRaw = localStorage.getItem(USER_ACCOUNT_KEY);
-        const users = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
+    const storedUsersRaw = localStorage.getItem('todoUserAccount');
+    const users = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
 
-        if (users.length === 0) {
-            messageDiv.style.color = 'red';
-            messageDiv.textContent = "No accounts found. Please sign up first.";
-            return;
-        }
+    if (users.length === 0) {
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = "No accounts found. Please sign up first.";
+        return;
+    }
 
-        if (!selectedRole) {
-            messageDiv.style.color = 'red';
-            messageDiv.textContent = "Please select a role.";
-            return;
-        }
+    if (!selectedRole) {
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = "Please select a role.";
+        return;
+    }
     
-        const matchingUser = users.find(user => 
-            user.email === email && 
-            user.password === password && 
-            user.role === selectedRole
-        );
+    const matchingUser = users.find(user => 
+        user.email === email && 
+        user.password === password && 
+        user.role === selectedRole
+    );
 
-        if (matchingUser) {
-            localStorage.setItem(TOKEN_KEY, 'valid');
-            localStorage.setItem(ROLE_KEY, selectedRole);
-            localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(matchingUser));
+    if (matchingUser) {
 
-            messageDiv.style.color = 'green';
-            messageDiv.textContent = `Login successful as ${selectedRole}! Loading dashboard...`;
+        localStorage.setItem('authToken', 'valid');
+        localStorage.setItem('userRole', selectedRole);
+        localStorage.setItem('loggedInUser', JSON.stringify(matchingUser));
 
-            setTimeout(() => {
-                if (selectedRole === 'Admin') {
-                    window.location.href = 'admin_dashboard.html';
-                } else {
-                    window.location.href = 'student_system.html';
-                }
-            }, 500);
+        messageDiv.style.color = 'green';
+        messageDiv.textContent = `Login successful as ${selectedRole}! Loading dashboard...`;
 
-        } else {
-            messageDiv.style.color = 'red';
-            messageDiv.textContent = "Invalid credentials or incorrect role selected.";
-        }
+        setTimeout(() => {
+            if (selectedRole === 'Admin') {
+                window.location.href = 'admin_dashboard.html';
+            } else {
+                window.location.href = 'student_system.html';
+            }
+        }, 600);
+
+    } else {
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = "Invalid credentials or incorrect role selected.";
+    }
+}
 
         document.addEventListener('DOMContentLoaded', setAppBackground);
     </script>
