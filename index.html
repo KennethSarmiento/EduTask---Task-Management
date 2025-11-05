@@ -90,11 +90,11 @@
         // Check for persistent session and redirect
         const currentRole = localStorage.getItem(ROLE_KEY);
         if (localStorage.getItem(TOKEN_KEY) === 'valid') {
-              if (currentRole === 'Admin') {
-                  window.location.href = 'admin_dashboard.html'; 
-              } else if (currentRole === 'Student') {
-                  window.location.href = 'student_system.html'; 
-              }
+          if (currentRole === 'Admin') {
+              window.location.href = 'admin_dashboard.html'; 
+          } else if (currentRole === 'Student') {
+              window.location.href = 'student_system.html'; 
+          }
         }
 
         function handleLogin() {
@@ -134,13 +134,12 @@
                 messageDiv.textContent = `Login successful as ${selectedRole}! Loading dashboard...`;
                 
                 setTimeout(() => {
-                    if (selectedRole === 'Admin') {
-                        window.location.href = 'admin_dashboard.html';
-                    } else {
-                        window.location.href = 'student_system.html'; 
-                    }
+                if (selectedRole === 'Admin') {
+                    window.location.href = 'admin_dashboard.html';
+                } else {
+                    window.location.href = 'student_system.html'; 
+                }
                 }, 500);
-            } else {
                 messageDiv.style.color = 'red';
                 messageDiv.textContent = "Invalid credentials or incorrect role selected.";
             }
