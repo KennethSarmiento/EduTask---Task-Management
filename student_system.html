@@ -87,7 +87,10 @@ function renderDashboard(){
 function renderActiveTasks(){
     const list = document.getElementById("activeTaskList");
     list.innerHTML = "";
-    tasks.filter(t => !t.completed).forEach(task => {
+    tasks
+        .filter(t => !t.completed)
+        .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+        .forEach(task => {
         list.innerHTML += `
         <li class="task-item">
             <div>
@@ -103,7 +106,10 @@ function renderActiveTasks(){
 function renderHistory(){
     const list = document.getElementById("historyTaskList");
     list.innerHTML = "";
-    tasks.filter(t => t.completed).forEach(task => {
+    tasks
+        .filter(t => t.completed)
+        .sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate))
+        .forEach(task => {
         list.innerHTML += `
         <li class="task-item">
             <div>
@@ -138,27 +144,25 @@ function addNewTask(){
     renderDashboard();
     renderActiveTasks();
     switchTab("tasks");
+
+    // Clear form
+    document.getElementById("taskTitle").value = "";
+    document.getElementById("taskSubject").value = "";
+    document.getElementById("taskDueDate").value = "";
+    document.getElementById("taskPriority").value = "Medium";
+    document.getElementById("taskDescription").value = "";
 }
 
 function toggleTask(id){
     const task = tasks.find(t => t.id === id);
-    task.completed = !task.completed;
-    saveTasks();
-    renderDashboard();
-    renderActiveTasks();
-    renderHistory();
-}
-
-// --- Logout with confirmation ---
-document.getElementById('logoutBtn').addEventListener('click', (e)=>{
-    e.preventDefault();
-    if(confirm('Are you sure you want to log out?')){
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(ROLE_KEY);
-        localStorage.removeItem(LOGGED_IN_USER_KEY);
-        window.location.href = 'index.html';
+    if(confirm(`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}?`)){
+        task.completed = !task.completed;
+        saveTasks();
+        renderDashboard();
+        renderActiveTasks();
+        renderHistory();
     }
-});
+}
 
 function switchTab(section){
     document.querySelectorAll(".content-section").forEach(s => s.style.display = "none");
@@ -168,19 +172,32 @@ function switchTab(section){
     document.querySelector(`.nav-item[data-section="${section}"]`).classList.add("active");
 }
 
-document.querySelectorAll(".nav-item").forEach(btn => {
-    btn.onclick = () => switchTab(btn.dataset.section);
-});
-
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("studentName").textContent = loggedInUser.fullName || "Student";
     renderDashboard();
     renderActiveTasks();
     renderHistory();
+    switchTab("dashboard");
+
+    document.getElementById('logoutBtn').addEventListener('click', (e)=>{
+        e.preventDefault();
+        if(confirm('Are you sure you want to log out?')){
+            localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem(ROLE_KEY);
+            localStorage.removeItem(LOGGED_IN_USER_KEY);
+            window.location.href = 'index.html';
+        }
+    });
+
+    document.querySelectorAll(".nav-item").forEach(btn => {
+        btn.onclick = () => switchTab(btn.dataset.section);
+    });
 });
 </script>
 
 <nav class="navbar">
+    <a class="logo">Student To-Do</a>
+    <nav class="navbar">
     <a class="logo">Student To-Do</a>
     <div class="navbar-nav">
         <a class="nav-item active" data-section="dashboard">📊 Dashboard</a>
