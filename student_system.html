@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student To-Do System</title>
 <style>
-/* --- COLORS AND VARIABLES --- */
 :root {
     --main-text-color: #fff;
     --box-background-color: rgba(69, 49, 49, 0.7); 
@@ -15,7 +14,6 @@
     --navbar-bg: rgba(60, 40, 40, 0.95);
 }
 
-/* --- BODY & BACKGROUND --- */
 body { 
     font-family: 'Inter', sans-serif; 
     margin: 0; padding: 0; color: var(--main-text-color);
@@ -27,7 +25,6 @@ body {
     background-color: rgba(0, 0, 0, 0.6); 
 }
 
-/* --- NAVBAR --- */
 .navbar { background-color: var(--navbar-bg); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;}
 .navbar .logo { font-size: 24px; font-weight: bold; color: var(--accent-color); }
 .navbar-nav { display: flex; }
@@ -35,32 +32,38 @@ body {
 .navbar a:hover { background-color: rgba(255, 255, 255, 0.1); color: var(--accent-color); }
 .navbar a.active { background-color: var(--accent-color); color: #333;}
 
-/* --- CONTAINER & SECTIONS --- */
 .container { max-width: 1000px; margin: 30px auto; padding: 20px;}
 .content-section { background: var(--box-background-color); padding: 30px; border-radius: 12px; margin-top: 30px;}
 h2 { text-align: center; color: var(--soft-white); margin-bottom: 5px;}
 
-/* --- DASHBOARD --- */
 .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 20px; }
 .dashboard-card { background: var(--input-background-color); padding: 20px 15px; border-radius: 10px; text-align: center;}
 .dashboard-card .value { font-size: 2.3em; font-weight: bold;}
 
-/* --- TASK LIST --- */
 .task-list, .history-list { list-style: none; padding: 0; }
+
+/* --- TASK ITEM WITH BUTTON TOP-RIGHT --- */
 .task-item { 
     background: var(--input-background-color); 
     border-left: 5px solid #777; 
     padding: 15px; 
     margin-bottom: 15px; 
     border-radius: 10px; 
-    position: relative; /* para sa top-right button */
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start; 
+    flex-wrap: wrap;
 }
 
-.task-item button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
+.task-item div { 
+    flex: 1; 
+    margin-right: 10px; 
+}
+
+.task-item button { 
+    flex-shrink: 0; 
+    cursor: pointer; 
+    margin-top: 0; 
 }
 
 /* --- FORM --- */
@@ -73,13 +76,11 @@ h2 { text-align: center; color: var(--soft-white); margin-bottom: 5px;}
 <body>
 
 <script>
-// --- LOCAL STORAGE KEYS ---
 const TOKEN_KEY = 'authToken';
 const ROLE_KEY = 'userRole';
 const TASKS_KEY = 'studentTasks'; 
 const LOGGED_IN_USER_KEY = 'loggedInUser';
 
-// --- LOGIN CHECK ---
 const isLoggedIn = localStorage.getItem(TOKEN_KEY) === 'valid';
 const userRole = localStorage.getItem(ROLE_KEY);
 
@@ -88,14 +89,11 @@ if(!isLoggedIn || userRole !== 'Student'){
     window.location.href = 'index.html';
 }
 
-// --- LOGGED IN USER & TASKS ---
 const loggedInUser = JSON.parse(localStorage.getItem(LOGGED_IN_USER_KEY)) || {};
 let tasks = JSON.parse(localStorage.getItem(TASKS_KEY)) || [];
 
-// --- SAVE TASKS ---
 function saveTasks(){ localStorage.setItem(TASKS_KEY, JSON.stringify(tasks)); }
 
-// --- DASHBOARD RENDER ---
 function renderDashboard(){
     const total = tasks.length;
     const completed = tasks.filter(t => t.completed).length;
@@ -107,7 +105,6 @@ function renderDashboard(){
     document.getElementById("taskProgress").textContent = progress + "%";
 }
 
-// --- ACTIVE TASKS RENDER ---
 function renderActiveTasks(){
     const list = document.getElementById("activeTaskList");
     list.innerHTML = "";
@@ -124,7 +121,6 @@ function renderActiveTasks(){
     });
 }
 
-// --- HISTORY RENDER ---
 function renderHistory(){
     const list = document.getElementById("historyTaskList");
     list.innerHTML = "";
@@ -140,7 +136,6 @@ function renderHistory(){
     });
 }
 
-// --- ADD NEW TASK ---
 function addNewTask(){
     const title = document.getElementById("taskTitle").value.trim();
     const subject = document.getElementById("taskSubject").value.trim();
@@ -166,7 +161,6 @@ function addNewTask(){
     switchTab("tasks");
 }
 
-// --- TOGGLE TASK COMPLETION ---
 function toggleTask(id){
     const task = tasks.find(t => t.id === id);
     task.completed = !task.completed;
@@ -176,7 +170,6 @@ function toggleTask(id){
     renderHistory();
 }
 
-// --- LOGOUT CONFIRM ---
 document.getElementById('logoutBtn').addEventListener('click', (e)=>{
     e.preventDefault();
     if(confirm('Are you sure you want to log out?')){
@@ -187,7 +180,6 @@ document.getElementById('logoutBtn').addEventListener('click', (e)=>{
     }
 });
 
-// --- SWITCH TAB ---
 function switchTab(section){
     document.querySelectorAll(".content-section").forEach(s => s.style.display = "none");
     document.getElementById(section).style.display = "block";
@@ -199,7 +191,6 @@ document.querySelectorAll(".nav-item").forEach(btn => {
     btn.onclick = () => switchTab(btn.dataset.section);
 });
 
-// --- INIT ---
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("studentName").textContent = loggedInUser.fullName || "Student";
     renderDashboard();
@@ -208,7 +199,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-<!-- --- NAVBAR --- -->
 <nav class="navbar">
     <a class="logo">Student To-Do</a>
     <div class="navbar-nav">
