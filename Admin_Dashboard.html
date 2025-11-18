@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | User Accounts</title>
+    <style>
+        /* --- GLOBAL THEME & BACKGROUND SETTINGS --- */
+        :root {
+            --box-background-color: rgba(69, 49, 49, 0.9);    
+            --accent-color: #ffb800;    
+            --main-text-color: #f0f0f0;
+            --navbar-bg: rgba(60, 40, 40, 0.95);
+        }
+
+        body {    
+            font-family: 'Inter', sans-serif;    
+            color: var(--main-text-color);
+            background-image: url(lib.jpg);    
+            background-size: cover;
+            background-attachment: fixed; background-repeat: no-repeat;
+            background-position: center center; background-blend-mode: multiply;
+            background-color: rgba(0, 0, 0, 0.6);    
+            margin: 0;    
+            padding: 0;
+        }
+        .navbar { background-color: var(--navbar-bg); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: var(--main-text-color); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);}
+        .navbar .logo { font-size: 24px; font-weight: bold; color: var(--accent-color); }
+        .navbar a { color: var(--main-text-color); text-decoration: none; padding: 8px 15px; border-radius: 4px; transition: background-color 0.3s; }
+        .navbar a:hover { background-color: rgba(255, 255, 255, 0.1); color: var(--accent-color); }
+        .container { max-width: 1000px; margin: 40px auto; background: var(--box-background-color); padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); }
+        h1 { color: var(--accent-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; margin-top: 0; }
+        p { color: var(--main-text-color); }
+        table { width: 100%; border-collapse: collapse; margin-top: 30px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 15px; text-align: left; border: 1px solid rgba(255, 255, 255, 0.1); }
+        th { background-color: rgba(255, 184, 0, 0.5); color: #333; font-weight: bold; }
+        td { color: var(--main-text-color); }
+        .no-records { text-align: center; padding: 20px; color: #dc3545; font-weight: bold; }
+        .delete-btn { background-color: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; margin-right: 5px; }
+        .delete-btn:hover { background-color: #c0392b; }
+        .edit-btn { background-color: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; margin-right: 5px; }
+        .edit-btn:hover { background-color: #2980b9; }
+        
+        /* ADDED: Styles for the new top Reset Request Box */
+        .reset-request-box {
+            background-color: rgba(255, 140, 0, 0.2); 
+            border: 2px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .reset-request-box h2 {
+            color: var(--accent-color);
+            margin-top: 0;
+            font-size: 1.4em;
+            border-bottom: 1px dashed rgba(255, 184, 0, 0.5);
+            padding-bottom: 5px;
+        }
+        .request-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .request-details {
+            font-size: 0.9em;
+        }
+        .reset-process-btn {
+            background-color: #ff8c00; 
+            color: white; 
+            border: none; 
+            padding: 8px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            transition: background-color 0.3s; 
+            font-weight: bold;
+        }
+        .reset-process-btn:hover { background-color: #cc7000; }
+        .no-pending {
+            color: #ddd;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const TOKEN_KEY = 'authToken';
+        const ROLE_KEY = 'userRole';
+        const USER_ACCOUNT_KEY = 'todoUserAccount';
+        const LOGGED_IN_USER_KEY = 'loggedInUser';
+        const PASSWORD_RESET_REQUESTS_KEY = 'passwordResetRequests'; 
+
+        const isLoggedIn = localStorage.getItem(TOKEN_KEY) === 'valid';
+        const userRole = localStorage.getItem(ROLE_KEY);
+
+        // Enforce Admin Access
+        if (!isLoggedIn || userRole !== 'Admin') {
+            alert('Access Denied. Please log in as an Admin.');
+            window.location.href = 'Login.html';    
+        }
+    </script>
+    
+    <nav class="navbar">
+        <div class="logo">Admin Console</div>
+        <a href="javascript:void(0)" onclick="logout()">🚪 Logout</a>
+    </nav>
+
+    <div class="container">
+        <h1>👥 System User Accounts</h1>
+        
+        <div id="reset-request-box" class="reset-request-box">
+            <h2>🔑 Pending Password Reset Requests</h2>
+            </div>
+        <p>This panel displays all user accounts created via the signup page.</p>
+
+        <table id="userRecordsTable">
+            <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Student ID</th>
+                <th>Course</th>
+                <th>Birthday</th>
+                <th>Actions</th> 
+                </tr>
+        </table>
+        
+        <div id="statusMessage" class="no-records" style="display:none;">
+            No user accounts found. Please ensure a user signs up first via signup.html.
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            if (confirm('Are you sure you want to log out?')) {
+                localStorage.removeItem(TOKEN_KEY);
+                localStorage.removeItem(ROLE_KEY);
+                localStorage.removeItem(LOGGED_IN_USER_KEY);
+                window.location.href = 'Login.html';
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString || dateString === 'N/A') return 'N/A';
+            try {
+                const [year, month, day] = dateString.split('-');
+                const date = new Date(year, month - 1, day);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        // UPDATED: Timestamp helper function (for full date/time)
+        function formatTimestamp(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function deleteUser(emailToDelete) {
+            
+            const storedUsersRaw = localStorage.getItem(USER_ACCOUNT_KEY);
+            let users = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
+
+            if (confirm(`⚠️ WARNING: This will permanently delete the account for ${emailToDelete}. Continue?`)) {
+                
+                const updatedUsers = users.filter(user => user.email !== emailToDelete);
+                localStorage.setItem(USER_ACCOUNT_KEY, JSON.stringify(updatedUsers));
+                
+                alert(`User ${emailToDelete} deleted successfully.`);
+                displayUserRecord();    
+                
+                const loggedInEmail = JSON.parse(localStorage.getItem(LOGGED_IN_USER_KEY))?.email;
+                if (loggedInEmail === emailToDelete) {
+                    logout();
+                }
+            }
+        }
+
+        function promptForEdit(email) {
+            const storedUsersRaw = localStorage.getItem(USER_ACCOUNT_KEY);
+            let users = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
+            const userIndex = users.findIndex(user => user.email === email);
+            if (userIndex === -1) {
+                alert("User not found.");
+                return;
+            }
+
+            const user = users[userIndex];
+            
+            let fieldToEdit = prompt(`Select a field to edit for ${email}:\n1. Full Name (Current: ${user.fullName})\n2. Role (Current: ${user.role})\n3. Student ID (Current: ${user.studentId})\n4. Course (Current: ${user.course})\n5. Birthday (Current: ${user.birthday})\n\nEnter number (1-5):`);
+
+            let propertyKey;
+            let currentVal;
+            let promptMessage;
+
+            switch (fieldToEdit) {
+                case '1':
+                    propertyKey = 'fullName';
+                    currentVal = user.fullName;
+                    promptMessage = `Enter new Full Name for ${email}:`;
+                    break;
+                case '2':
+                    propertyKey = 'role';
+                    currentVal = user.role;
+                    promptMessage = `Enter new Role (e.g., Admin, Student) for ${email}:`;
+                    break;
+                case '3':
+                    propertyKey = 'studentId';
+                    currentVal = user.studentId;
+                    promptMessage = `Enter new Student ID for ${email}:`;
+                    break;
+                case '4':
+                    propertyKey = 'course';
+                    currentVal = user.course;
+                    promptMessage = `Enter new Course for ${email}:`;
+                    break;
+                case '5':
+                    propertyKey = 'birthday';
+                    currentVal = user.birthday;
+                    promptMessage = `Enter new Birthday (YYYY-MM-DD) for ${email}:`;
+                    break;
+                default:
+                    alert("Invalid selection or canceled.");
+                    return;
+            }
+
+            let newVal = prompt(promptMessage, currentVal);
+
+            if (newVal !== null && newVal.trim() !== currentVal) {
+                users[userIndex][propertyKey] = newVal.trim();
+                localStorage.setItem(USER_ACCOUNT_KEY, JSON.stringify(users));
+                alert(`User ${email}'s ${propertyKey} updated successfully to: ${newVal.trim()}`);
+                displayUserRecord();
+            } else if (newVal !== null) {
+                 alert("No changes made.");
+            }
+        }
+        
+        // --- Password Reset Logic Helpers ---
+
+        function getPendingRequests() {
+            const requestsRaw = localStorage.getItem(PASSWORD_RESET_REQUESTS_KEY);
+            const requests = requestsRaw ? JSON.parse(requestsRaw) : [];
+            return requests.filter(req => req.status === 'pending');
+        }
+
+        function updateRequestStatus(requestId, status) {
+            const requestsRaw = localStorage.getItem(PASSWORD_RESET_REQUESTS_KEY);
+            let requests = requestsRaw ? JSON.parse(requestsRaw) : [];
+            
+            const requestIndex = requests.findIndex(req => req.id === requestId);
+            if (requestIndex > -1) {
+                requests[requestIndex].status = status;
+                localStorage.setItem(PASSWORD_RESET_REQUESTS_KEY, JSON.stringify(requests));
+            }
+        }
+
+        /**
+         * Renders the dedicated box for pending reset requests.
+         */
+        function displayResetRequestsBox() {
+            const box = document.getElementById('reset-request-box');
+            const pendingRequests = getPendingRequests();
+            
+            box.innerHTML = `<h2>🔑 Pending Password Reset Requests (${pendingRequests.length})</h2>`;
+
+            if (pendingRequests.length === 0) {
+                box.innerHTML += `<p class="no-pending">No pending password reset requests at this time.</p>`;
+                return;
+            }
+
+            pendingRequests.forEach(request => {
+                const item = document.createElement('div');
+                item.classList.add('request-item');
+                item.innerHTML = `
+                    <div class="request-details">
+                        <strong>Email:</strong> ${request.email}<br>
+                        <strong>Requested:</strong> ${formatTimestamp(request.timestamp)}
+                    </div>
+                    <button class="reset-process-btn" onclick="handleResetRequest('${request.email}', '${request.id}')">
+                        Process Reset
+                    </button>
+                `;
+                box.appendChild(item);
+            });
+        }
+
+
+        function handleResetRequest(email, requestId) {
+            const newPassword = prompt(`Approve password reset for ${email}. Enter the NEW temporary password:`);
+            if (newPassword === null || newPassword.trim() === '') {
+                alert('Password reset canceled. A new password must be provided.');
+                return;
+            }
+
+            const storedUsersRaw = localStorage.getItem(USER_ACCOUNT_KEY);
+            let users = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
+            const userIndex = users.findIndex(user => user.email === email);
+
+            if (userIndex > -1) {
+                // 1. Update the user's password
+                users[userIndex].password = newPassword.trim();
+                localStorage.setItem(USER_ACCOUNT_KEY, JSON.stringify(users));
+                
+                // 2. Update the request status to approved
+                updateRequestStatus(requestId, 'approved');
+                
+                alert(`Password for ${email} successfully reset to: ${newPassword.trim()}. The user must use this new password to log in.`);
+                
+                // 3. Refresh both displays
+                displayUserRecord();
+                displayResetRequestsBox();
+            } else {
+                alert(`Error: User with email ${email} not found.`);
+                updateRequestStatus(requestId, 'error');
+            }
+        }
+        
+        // --- END Reset Logic Helpers ---
+
+        function displayUserRecord() {
+            const table = document.getElementById("userRecordsTable");
+            const statusMessage = document.getElementById("statusMessage");
+            const storedUsersRaw = localStorage.getItem(USER_ACCOUNT_KEY);
+
+            // Clear existing data rows (keep the header row)
+            const rows = table.querySelectorAll('tr:not(:first-child)');
+            rows.forEach(row => row.remove());
+            statusMessage.style.display = 'none';
+
+            const users = storedUsersRaw ? JSON.parse(storedUsersRaw) : [];
+
+            if (users.length === 0) {
+                statusMessage.style.display = 'block';
+                return;
+            }
+
+            try {
+                users.forEach(user => {
+                    const row = table.insertRow(-1);    
+                    row.insertCell(0).textContent = user.fullName || 'N/A';
+                    row.insertCell(1).textContent = user.email || 'N/A';
+                    row.insertCell(2).textContent = user.role || 'N/A';
+                    row.insertCell(3).textContent = user.studentId || 'N/A';    
+                    row.insertCell(4).textContent = user.course || 'N/A';        
+                    row.insertCell(5).textContent = formatDate(user.birthday) || 'N/A';
+                    
+                    // Action cell for Edit/Delete 
+                    const actionCell = row.insertCell(6);
+                    actionCell.innerHTML = `
+                        <button class="edit-btn" onclick="promptForEdit('${user.email}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteUser('${user.email}')">Delete Account</button>
+                    `;
+                    
+                    // The old Reset Request cell is no longer added here.
+                });
+
+            } catch (e) {
+                console.error("Error parsing stored user data:", e);
+                statusMessage.textContent = "Error loading user data format.";
+                statusMessage.style.display = 'block';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayResetRequestsBox(); // Display the new box first
+            displayUserRecord();
+        });
+    </script>
+</body>
+</html>
